@@ -113,14 +113,6 @@ confku.getUserMedia = function () {
 	getUserMedia({'video': true, 'audio': true}, onUserMediaSuccess, onUserMediaFailed);
 };
 
-/** create Peer Connection for each peer in the same room **/
-confku.createAllPC = function () {
-	console.log('createAllPC');
-	for (var key in this.conns) {
-		var peerId = this.conns[key].peerId;
-		this.createPC(peerId);
-	}
-};
 
 /**
  * create Peer Connection for a peer
@@ -160,16 +152,6 @@ confku.createPC = function (peerId) {
 	return pc;
 };
 
-/**
- * add myStream to each PeerConnection.
- */
-confku.addStreams = function () {
-	for (var key in this.conns) {
-		var pc = this.conns[key].pc;
-		pc.addStream(this.myStream);
-	}
-};
-
 
 /**
  * send offer to a peer
@@ -201,14 +183,36 @@ confku.sendOffer = function (peerId) {
 	pc.createOffer(_onSuccess, _onFailed, sdpConstraints);
 };
 
+
+confku.recvChanOnMessage = function (event) {
+	console.log('recvChanOnMessage data = ' + event.data);
+};
+
+confku.recvChanOnStateChange = function (event) {
+	var readyState = confku.recvChan.readyState;
+	console.log('Receive channel state is: ' + readyState);
+};
+
+confku.recvChanCb = function(event) {
+	console.log('pc on data channel');
+	confku.recvChan = event.channel;
+	confku.recvChan.onmessage = confku.recvChanOnMessage;
+	confku.recvChan.onclose = confku.recvChanOnStateChange;
+	confku.recvChan.onopen = confku.recvChanOnStateChange;
+};
+
 /**
- * send offer to each peer in same room
+ * create data channel
  */
-confku.sendOffers = function () {
-	for (var key in this.conns) {
-		var peerId = this.conns[key].peerId;
-		this.sendOffer(peerId);
-	}
+confku.createDC = function (peerId) {
+	var dataConstraint = {reliable: true};
+	var pc = confku.conns[peerId].pc;
+	console.log('create Data channel to '  + peerId);
+	var dc = confku.conns[peerId].dc = pc.createDataChannel('dataChannel', dataConstraint);
+	pc.ondatachannel = confku.recvChanCb;
+	dc.onopen = function () {
+		console.log('DC Open brow');
+	};
 };
 
 /**
@@ -219,9 +223,12 @@ confku.sendOffers = function () {
  */
 confku.setupConns = function () {
 	console.log('setup Conns');
-	this.createAllPC();
-	this.addStreams();
-	this.sendOffers();
+	for (var peerId  in this.conns) {
+		var pc = this.createPC(peerId);
+		pc.addStream(confku.myStream);
+		//this.createDC(peerId);
+		this.sendOffer(peerId);
+	}
 };
 
 
@@ -318,8 +325,8 @@ confku.ee.on('get_peers', function (data) {
 /**
  * new peer joining room
  */
-confku.ee.on('new_peer_connected', function (data) {
-	//confku.connections.push(data.peerId);
+confku.ee.on('peer_join_room', function (data) {
+	console.log('on peer_join_room:' + data.peerId);
 	confku.conns[data.peerId] = confku.NewConn(data.peerId, data.name);
 	var pc = confku.createPC(data.peerId);
 	pc.addStream(confku.myStream);
@@ -328,8 +335,8 @@ confku.ee.on('new_peer_connected', function (data) {
 /**
  * peer leave the room
  */
-confku.ee.on('remove_peer_connected', function (data) {
-	console.log('on remove_peer_connected:' + data.peerId);
+confku.ee.on('peer_leave_room', function (data) {
+	console.log('on peer_leave_room:' + data.peerId);
 	//delete(confku.peerConnections[data.peerId]);
 	delete(confku.conns[data.peerId]);
 	//FIXME.TODO.delete connections
@@ -384,7 +391,7 @@ confku.ee.on('ice_candidate', function(data) {
  * Happened when peerconnection get onaddstream event
  */
 confku.ee.on('add_remote_stream', function (stream, peerId) {
-	console.log("ADDING REMOTE STREAM. TODO");
+	console.log("on add_remote_stream");
 	var vidElem = confkuUI.addVideo(stream, peerId);
 	attachMediaStream(vidElem, stream);
 });

@@ -112,7 +112,7 @@ class WebSocketApp(object):
         """a method that will be called when this websocket is closed"""
         logging.info("close the session for ws = " + ws.sessid)
         msg = json.dumps({
-            'eventName': 'remove_peer_connected',
+            'eventName': 'peer_leave_room',
             'data': {
                 'peerId': ws.sessid,
                 'name': ws.name,
@@ -150,9 +150,9 @@ class WebSocketApp(object):
         logging.debug("on_join_room.sessid = " + ws.sessid + ".roomname=" + ws.room_name)
         rooms.add(ws, room_name)
 
-        #emit to room: new peers connected
+        #emit to room: new peer join a room
         new_peer_msg = json.dumps({
-            'eventName': 'new_peer_connected',
+            'eventName': 'peer_join_room',
             'data': {
                 'peerId': ws.sessid,
                 'name': name,
