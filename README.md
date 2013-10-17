@@ -112,3 +112,10 @@ TODO
 LICENSE
 ------
 BSD License
+
+
+-------
+CREDITS
+------
+Initial client code of this library come from webrtc.io project 
+https://github.com/webRTC/webRTC.io
