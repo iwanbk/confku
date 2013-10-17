@@ -53,10 +53,11 @@ It will listen on port 8001
 USAGE EXAMPLE
 ------------
 * You need to implement two functions to make it works:
+    
     /**
-    * this function will be called by confku library when
-    * stream from some peer become available.
-    */
+     * this function will be called by confku library when
+     * stream from some peer become available.
+     */
     confkuUI.addVideo = function (stream, peerId);
 
     /**
