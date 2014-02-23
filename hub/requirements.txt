@@ -1,7 +1,6 @@
-Flask==0.9
-Jinja2==2.6
-Werkzeug==0.8.3
 argparse==1.2.1
-gevent-websocket==0.3.6
-greenlet==0.4.0
+distribute==0.6.24
+gevent==1.0
+gevent-websocket==0.9.3
+greenlet==0.4.2
 wsgiref==0.1.2
