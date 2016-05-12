@@ -1,0 +1,3 @@
+v0.3 - 2016-05-13
+- move to Go based signaling server
+- update to latest adapter.js
