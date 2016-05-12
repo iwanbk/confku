@@ -107,10 +107,12 @@ confku.getUserMedia = function () {
 	var onUserMediaSuccess = function (stream) {
 		console.log('onUserMediaSuccess');
 		confku.myStream = stream;
-		attachMediaStream(root.localVideo, stream);
+		//attachMediaStream(root.localVideo, stream);
+        root.localVideo.src = URL.createObjectURL(stream);
 		root.ee.trigger('getusermedia_success');
 	};
-	getUserMedia({'video': true, 'audio': true}, onUserMediaSuccess, onUserMediaFailed);
+    console.log("getting user media");
+	navigator.getUserMedia({'video': true, 'audio': true}, onUserMediaSuccess, onUserMediaFailed);
 };
 
 
@@ -393,5 +395,6 @@ confku.ee.on('ice_candidate', function(data) {
 confku.ee.on('add_remote_stream', function (stream, peerId) {
 	console.log("on add_remote_stream");
 	var vidElem = confkuUI.addVideo(stream, peerId);
-	attachMediaStream(vidElem, stream);
+	//attachMediaStream(vidElem, stream);
+    vidElem.src = URL.createObjectURL(stream);
 });

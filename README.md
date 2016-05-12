@@ -1,6 +1,16 @@
-ConfKu : JavaScript WebRTC conference library
+ConfKu : JavaScript WebRTC conference example
 
-You can use this library to build peer to peer video conference using WebRTC technology.
+You can use this example to build peer to peer video conference using WebRTC technology.
+
+This example has 3 components:
+
+- signaling server using Go, can be found in `hub` directory. 
+- javascript client in `client` directory
+- web app to serve HTML (with css and javascript) in [confku-sample](https://github.com/iwanbk/confku-sample) repo.
+
+Signaling is separated from web app to show that it is a distinct component, can be written in any language.
+
+
 
 ----------------------
 BUILD JAVASCRIPT CLIENT
@@ -52,13 +62,12 @@ RUN SIGNALING SERVER
 
 * install requirement
     
-    pip install -r requirements.txt
-    
-    (it will be better if you do it inside a virtualenv)
+    go get -v
+
 
 * run it
     
-    python hub.py
+    go run *.go
 
 
 It will listen on port 8001
