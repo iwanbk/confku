@@ -12,7 +12,7 @@ type Conn struct {
 	ws      *websocket.Conn `json:"-"`
 	SessID  string          `json:"peerId"`
 	Name    string          `json:"-"`
-	Room    string          `json:"-"`
+	Room    string          `json:"-"` // room name
 	outChan chan []byte     `json:"-"` // channel for data to be written
 }
 
@@ -29,9 +29,30 @@ func (c *Conn) String() string {
 }
 
 func (c *Conn) mainLoop() {
+	defer c.cleanup()
+
 	go c.sendLoop()
 	//go c.readPubsubLoop()
 	c.ReadLoop()
+}
+
+// cleanup:
+// - leave from room
+// - send leave_room event
+func (c *Conn) cleanup() {
+	room := rooms.getRoom(c.Room)
+	if room == nil {
+		return
+	}
+	room.remove(c)
+	evt := Event{
+		Name: "peer_leave_room",
+		Data: EventData{
+			PeerID: c.SessID,
+			Name:   c.Name,
+		},
+	}
+	room.broadcast(c, &evt, true)
 }
 
 func (c *Conn) send(evt *Event) error {

@@ -16,9 +16,15 @@ func (r *room) getConn(peerID string) *Conn {
 	}
 	return c
 }
+
+func (r *room) remove(c *Conn) {
+	delete(r.Conns, c.SessID)
+}
+
+// me : flag to also send to me
 func (r *room) broadcast(c *Conn, evt *Event, me bool) {
 	for _, p := range r.Conns {
-		if !me && p.SessID == c.SessID {
+		if !me && c != nil && p.SessID == c.SessID {
 			continue
 		}
 		p.send(evt)
